@@ -475,6 +475,7 @@ def build_kpi_table(df: pd.DataFrame) -> str:
         return "background-color:#bbf7d0"
 
     PCT_COLS = {"近12月對中依賴"}
+    NUMERIC_COLS = {"近12月進口值 (USD)", "近12個月出口值 (USD)"}
     cols = list(rows[0].keys())
     html = ['<table class="kpi-table"><thead><tr>']
     for c in cols:
@@ -483,7 +484,14 @@ def build_kpi_table(df: pd.DataFrame) -> str:
     for row in rows:
         html.append("<tr>")
         for c in cols:
-            style = f' style="{pct_style(row[c])}"' if c in PCT_COLS else ""
+            styles = []
+            if c in PCT_COLS:
+                pct_css = pct_style(row[c])
+                if pct_css:
+                    styles.append(pct_css)
+            if c in NUMERIC_COLS:
+                styles.append("text-align:right")
+            style = f' style="{";".join(styles)}"' if styles else ""
             html.append(f"<td{style}>{row[c]}</td>")
         html.append("</tr>")
     html.append("</tbody></table>")
