@@ -360,7 +360,7 @@ def build_import_charts(df: pd.DataFrame) -> "dict[str, str]":
     )
     fig.update_layout(
         hovermode="x unified",
-        legend=dict(orientation="h", y=-0.25, font_size=11),
+        legend=dict(orientation="h", y=-0.25, font_size=14),
         xaxis_title=None,
     )
     fig.update_xaxes(dtick="M1", tickformat="%Y-%m")
@@ -384,7 +384,7 @@ def build_import_charts(df: pd.DataFrame) -> "dict[str, str]":
     )
     fig2.update_layout(
         hovermode="x unified",
-        legend=dict(orientation="h", y=-0.35, font_size=10),
+        legend=dict(orientation="h", y=-0.35, font_size=14),
         xaxis_title=None,
     )
     fig2.update_xaxes(dtick="M1", tickformat="%Y-%m")
@@ -411,7 +411,7 @@ def build_export_charts(df: pd.DataFrame) -> "dict[str, str]":
         title="月出口值 — 依類別",
         height=CHART_HEIGHT,
     )
-    fig.update_layout(hovermode="x unified", legend=dict(orientation="h", y=-0.25, font_size=11))
+    fig.update_layout(hovermode="x unified", legend=dict(orientation="h", y=-0.25, font_size=12))
     charts["export_area"] = chart_html(fig)
     return charts
 
@@ -448,7 +448,7 @@ def build_china_charts(df: pd.DataFrame) -> "dict[str, str]":
         yaxis=dict(tickfont=dict(size=13)),
         margin=dict(l=10, r=100, t=50, b=40),
         bargap=0.35,
-        legend=dict(orientation="h", y=-0.08, font_size=11),
+        legend=dict(orientation="h", y=-0.08, font_size=12),
     )
     charts["china_bar"] = chart_html(fig, fixed_height=bar_height)
 
@@ -472,7 +472,7 @@ def build_china_charts(df: pd.DataFrame) -> "dict[str, str]":
     fig2.update_layout(
         hovermode="x unified",
         yaxis=dict(ticksuffix="%", range=[0, 110]),
-        legend=dict(orientation="h", y=-0.3, font_size=10),
+        legend=dict(orientation="h", y=-0.3, font_size=12),
     )
     charts["china_trend"] = chart_html(fig2)
 
@@ -506,10 +506,12 @@ def build_detail_charts(df: pd.DataFrame) -> "dict[str, str]":
         )
         annual["value_usd"] = annual["value_kusd"] * 1_000
         annual["value_usd_m"] = annual["value_usd"] / 1_000_000
+        partner_display_order = [display_country_name(country) for country in partner_order]
 
         fig = px.bar(
             annual, x="year_label", y="value_usd", color="partner",
             color_discrete_map=partner_color_map,
+            category_orders={"partner": partner_order},
             custom_data=["value_usd_m"],
             labels={"value_usd": "USD", "year_label": "年份", "partner": "貿易夥伴"},
             barmode="stack",
@@ -520,7 +522,7 @@ def build_detail_charts(df: pd.DataFrame) -> "dict[str, str]":
             legend=dict(
                 orientation="h",
                 y=-0.3,
-                font_size=10,
+                font_size=12,
                 itemwidth=30,
                 tracegroupgap=0,
             ),
@@ -631,18 +633,25 @@ def build_export_destination_charts(df: pd.DataFrame) -> "dict[str, str]":
         .sum().reset_index().sort_values("date")
     )
     monthly["value_usd"] = monthly["value_kusd"] * 1_000
+    monthly["value_usd_m"] = monthly["value_usd"] / 1_000_000
     monthly["partner_display"] = monthly["partner"].map(display_country_name)
+    partner_display_order = [display_country_name(country) for country in partner_order]
     fig_monthly = px.bar(
         monthly,
         x="date", y="value_usd", color="partner_display",
         color_discrete_map=partner_color_map,
+        category_orders={"partner_display": partner_display_order},
+        custom_data=["value_usd_m"],
         labels={"value_usd": "出口值 (USD)", "date": "年月", "partner_display": "目的地"},
         title="台灣電池月出口值 — 依目的地",
         barmode="stack",
         height=CHART_HEIGHT,
     )
-    fig_monthly.update_layout(legend=dict(orientation="h", y=-0.25, font_size=11))
-    charts["export_monthly"] = chart_html(fig_monthly)
+    fig_monthly.update_layout(legend=dict(orientation="h", y=-0.25, font_size=12))
+    fig_monthly.update_traces(
+        hovertemplate="%{x|%Y-%m}<br>%{fullData.name}<br>$%{customdata[0]:,.1f}M<extra></extra>"
+    )
+    charts["export_monthly"] = chart_html(fig_monthly, fixed_width=1600)
 
     # ── Annual comparison: top 6 countries ────────────────────────────────────
     df_e["year_label"] = df_e["date"].dt.year.astype(str)
@@ -656,12 +665,13 @@ def build_export_destination_charts(df: pd.DataFrame) -> "dict[str, str]":
         annual,
         x="year_label", y="value_usd", color="partner_display",
         color_discrete_map=partner_color_map,
+        category_orders={"partner_display": partner_display_order},
         labels={"value_usd": "出口值 (USD)", "year_label": "年份", "partner_display": "目的地"},
         title="台灣電池年出口值 — 依目的地",
         barmode="stack",
         height=CHART_HEIGHT,
     )
-    fig_annual.update_layout(legend=dict(orientation="h", y=-0.25, font_size=11))
+    fig_annual.update_layout(legend=dict(orientation="h", y=-0.25, font_size=12))
     charts["export_annual"] = chart_html(fig_annual)
 
     # ── Line chart: top 6 countries trend ────────────────────────────────────
@@ -676,13 +686,14 @@ def build_export_destination_charts(df: pd.DataFrame) -> "dict[str, str]":
         monthly_line,
         x="date", y="value_usd", color="partner_display",
         color_discrete_map=partner_color_map,
+        category_orders={"partner_display": partner_display_order[:-1]},
         labels={"value_usd": "出口值 (USD)", "date": "年月", "partner_display": "目的地"},
         title="主要出口目的地月趨勢（前6）",
         height=CHART_HEIGHT,
     )
     fig_line.update_layout(
         hovermode="x unified",
-        legend=dict(orientation="h", y=-0.25, font_size=11),
+        legend=dict(orientation="h", y=-0.25, font_size=12),
     )
     charts["export_lines"] = chart_html(fig_line)
 
@@ -920,7 +931,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
   <button class="tab-btn" onclick="showTab('import-trend')">📈 進口月趨勢</button>
   <button class="tab-btn" onclick="showTab('export-dest')">📤 電池出口目的地</button>
   <button class="tab-btn" onclick="showTab('china')">🇨🇳 中國依賴度</button>
-  <button class="tab-btn" onclick="showTab('detail')">🏷️ HS Code 細目</button>
+  <button class="tab-btn" onclick="showTab('detail')">🏷️ 進口細目</button>
 </div>
 
 <!-- Tab: Summary -->
