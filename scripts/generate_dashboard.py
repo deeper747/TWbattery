@@ -83,12 +83,17 @@ def load_data() -> pd.DataFrame:
     return df
 
 
-def chart_html(fig, fixed_height: int = None) -> str:
+def chart_html(fig, fixed_height: int = None, fixed_width: int = None) -> str:
     """Return plotly figure as an embeddable <div>.
-    Pass fixed_height to lock the height regardless of responsive resizing."""
+    Pass fixed_height / fixed_width to lock the chart size."""
     cfg = PLOTLY_CONFIG
-    if fixed_height:
-        fig.update_layout(height=fixed_height, autosize=False)
+    if fixed_height or fixed_width:
+        layout_updates = {"autosize": False}
+        if fixed_height:
+            layout_updates["height"] = fixed_height
+        if fixed_width:
+            layout_updates["width"] = fixed_width
+        fig.update_layout(**layout_updates)
         cfg = {**PLOTLY_CONFIG, "responsive": False}
     return pio.to_html(
         fig,
@@ -108,7 +113,7 @@ def country_color_map(countries: "list[str]") -> "dict[str, str]":
             color_map[country] = COUNTRY_RED
         elif country == "美國":
             color_map[country] = COUNTRY_BLUE
-        elif country == "其他 Others":
+        elif country == "其他":
             color_map[country] = COUNTRY_OTHER_GRAY
         else:
             color_map[country] = COUNTRY_PALETTE[palette_idx % len(COUNTRY_PALETTE)]
@@ -250,7 +255,7 @@ def build_china_charts(df: pd.DataFrame) -> "dict[str, str]":
 
 
 def build_detail_charts(df: pd.DataFrame) -> "dict[str, str]":
-    """One chart per HS code: trade partner breakdown."""
+    """One chart per HS code: annual trade partner breakdown."""
     df_i = df[df["direction"] == "I"].copy()
     charts = {}
 
@@ -265,15 +270,21 @@ def build_detail_charts(df: pd.DataFrame) -> "dict[str, str]":
         )
         df_hs2 = df_hs.copy()
         df_hs2["partner"] = df_hs2["country"].where(
-            df_hs2["country"].isin(top5), other="其他 Others"
+            df_hs2["country"].isin(top5), other="其他"
         )
-        monthly = df_hs2.groupby(["date", "partner"])["value_kusd"].sum().reset_index()
-        monthly["value_usd"] = monthly["value_kusd"] * 1_000
+        partner_order = top5 + (["其他"] if "其他" in df_hs2["partner"].values else [])
+        partner_color_map = country_color_map(partner_order)
+        annual = (
+            df_hs2.assign(year_label=df_hs2["date"].dt.year.astype(str))
+            .groupby(["year_label", "partner"])["value_kusd"]
+            .sum().reset_index()
+        )
+        annual["value_usd"] = annual["value_kusd"] * 1_000
 
         fig = px.bar(
-            monthly, x="date", y="value_usd", color="partner",
-            color_discrete_sequence=DSET_COLORS,
-            labels={"value_usd": "USD", "date": "年月", "partner": "貿易夥伴"},
+            annual, x="year_label", y="value_usd", color="partner",
+            color_discrete_map=partner_color_map,
+            labels={"value_usd": "USD", "year_label": "年份", "partner": "貿易夥伴"},
             barmode="stack",
             height=320,
         )
@@ -281,7 +292,7 @@ def build_detail_charts(df: pd.DataFrame) -> "dict[str, str]":
             legend=dict(orientation="h", y=-0.3, font_size=10),
             margin=dict(t=10, b=10),
         )
-        charts[hs6] = chart_html(fig)
+        charts[hs6] = chart_html(fig, fixed_width=640)
 
     return charts
 
@@ -364,8 +375,8 @@ def build_export_destination_charts(df: pd.DataFrame) -> "dict[str, str]":
 
     # ── Monthly stacked bar by top 6 countries ────────────────────────────────
     top6 = by_country["country"].head(6).tolist()
-    df_e["partner"] = df_e["country"].where(df_e["country"].isin(top6), other="其他 Others")
-    partner_order = top6 + (["其他 Others"] if "其他 Others" in df_e["partner"].values else [])
+    df_e["partner"] = df_e["country"].where(df_e["country"].isin(top6), other="其他")
+    partner_order = top6 + (["其他"] if "其他" in df_e["partner"].values else [])
     partner_color_map = country_color_map(partner_order)
     monthly = (
         df_e.groupby(["date", "partner"])["value_kusd"]
@@ -405,7 +416,7 @@ def build_export_destination_charts(df: pd.DataFrame) -> "dict[str, str]":
 
     # ── Line chart: top 6 countries trend ────────────────────────────────────
     monthly_line = (
-        df_e[df_e["partner"] != "其他 Others"]
+        df_e[df_e["partner"] != "其他"]
         .groupby(["date", "partner"])["value_kusd"]
         .sum().reset_index().sort_values("date")
     )
@@ -582,13 +593,12 @@ HTML_TEMPLATE = """<!DOCTYPE html>
     grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
     gap: 1rem;
   }}
-  .detail-chart-scroll {{
-    overflow-x: auto;
-    overflow-y: hidden;
-    -webkit-overflow-scrolling: touch;
-  }}
-  .detail-chart-scroll > div {{
-    min-width: 560px;
+  .detail-chart-frame {{
+    width: 100%;
+    margin: 0 auto;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
   }}
 
   /* KPI table */
@@ -818,7 +828,7 @@ def main():
         info = HS_FLAT.get(hs6, {})
         detail_cards_html += (
             f'<div class="card"><h3>{hs6} {info.get("tw_name","")}</h3>'
-            f'<div class="detail-chart-scroll">{chart}</div></div>\n'
+            f'<div class="detail-chart-frame">{chart}</div></div>\n'
         )
 
     updated = datetime.now().strftime("%Y-%m-%d %H:%M")
