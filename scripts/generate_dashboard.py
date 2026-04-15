@@ -235,13 +235,12 @@ def build_detail_charts(df: pd.DataFrame) -> "dict[str, str]":
             monthly, x="date", y="value_kusd", color="partner",
             color_discrete_sequence=DSET_COLORS,
             labels={"value_kusd": "千美元", "date": "年月", "partner": "貿易夥伴"},
-            title=f"{hs6} {info['tw_name']}",
             barmode="stack",
             height=320,
         )
         fig.update_layout(
             legend=dict(orientation="h", y=-0.3, font_size=10),
-            margin=dict(t=40, b=10),
+            margin=dict(t=10, b=10),
         )
         charts[hs6] = chart_html(fig)
 
@@ -261,6 +260,9 @@ def build_export_destination_charts(df: pd.DataFrame) -> "dict[str, str]":
         return {}
 
     charts = {}
+    start_label = df_e["date"].min().strftime("%Y-%m")
+    end_label = df_e["date"].max().strftime("%Y-%m")
+    cutoff_12m = df_e["date"].max() - pd.DateOffset(months=11)
 
     # ── Top destinations bar chart (cumulative) ───────────────────────────────
     by_country = (
@@ -275,13 +277,35 @@ def build_export_destination_charts(df: pd.DataFrame) -> "dict[str, str]":
         orientation="h",
         color_discrete_sequence=[DSET_NAVY],
         labels={"value_kusd": "出口值 (千USD)", "country": "目的地"},
-        title="台灣電池出口目的地（前15，累計）",
+        title=f"台灣電池出口目的地（前15，累計：{start_label} – {end_label}）",
         height=460,
         text=by_country["value_kusd"].map(lambda v: f"{int(v):,}"),
     )
     fig_bar.update_layout(yaxis={"categoryorder": "total ascending"})
     fig_bar.update_traces(textposition="outside")
     charts["export_dest_bar"] = chart_html(fig_bar)
+
+    # ── Top destinations bar chart (last 12 months) ───────────────────────────
+    by_country_12m = (
+        df_e[df_e["date"] >= cutoff_12m]
+        .groupby("country")["value_kusd"].sum()
+        .sort_values(ascending=False)
+        .head(15)
+        .reset_index()
+    )
+    fig_bar_12m = px.bar(
+        by_country_12m,
+        x="value_kusd", y="country",
+        orientation="h",
+        color_discrete_sequence=[DSET_COLORS[3]],
+        labels={"value_kusd": "出口值 (千USD)", "country": "目的地"},
+        title=f"台灣電池出口目的地（前15，近12個月：{cutoff_12m.strftime('%Y-%m')} – {end_label}）",
+        height=460,
+        text=by_country_12m["value_kusd"].map(lambda v: f"{int(v):,}"),
+    )
+    fig_bar_12m.update_layout(yaxis={"categoryorder": "total ascending"})
+    fig_bar_12m.update_traces(textposition="outside")
+    charts["export_dest_bar_12m"] = chart_html(fig_bar_12m)
 
     # ── Monthly stacked bar by top 6 countries ────────────────────────────────
     top6 = by_country["country"].head(6).tolist()
@@ -349,9 +373,11 @@ def build_export_destination_charts(df: pd.DataFrame) -> "dict[str, str]":
 
 def build_kpi_table(df: pd.DataFrame) -> str:
     df_i = df[df["direction"] == "I"]
+    df_e = df[df["direction"] == "E"]
     latest = df_i["date"].max()
     cutoff = latest - pd.DateOffset(months=11)
     df_12m = df_i[df_i["date"] >= cutoff]
+    df_e_12m = df_e[df_e["date"] >= cutoff]
 
     rows = []
     for hs6, info in HS_FLAT.items():
@@ -365,11 +391,13 @@ def build_kpi_table(df: pd.DataFrame) -> str:
         t12 = sub12["value_kusd"].sum()
         c12 = sub12[sub12["is_china"]]["value_kusd"].sum()
         p12 = c12 / t12 * 100 if t12 > 0 else 0
+        e12 = df_e_12m[df_e_12m["hs6"] == hs6]["value_kusd"].sum()
         rows.append({
             "類別": info["category"].split("(")[0].strip(),
             "HS Code": hs6,
             "品名": info["tw_name"],
             "近12月進口值 (千USD)": f"{int(t12):,}",
+            "近12個月出口值 (千USD)": f"{int(e12):,}",
             "近12月對中依賴": f"{p12:.1f}%",
         })
     if not rows:
@@ -486,6 +514,14 @@ HTML_TEMPLATE = """<!DOCTYPE html>
     grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
     gap: 1rem;
   }}
+  .detail-chart-scroll {{
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+  }}
+  .detail-chart-scroll > div {{
+    min-width: 560px;
+  }}
 
   /* KPI table */
   .kpi-table {{
@@ -568,7 +604,10 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 
 <!-- Tab: Export Destination -->
 <div id="tab-export-dest" class="tab-pane">
-  <div class="card">{export_dest_bar}</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+    <div class="card">{export_dest_bar}</div>
+    <div class="card">{export_dest_bar_12m}</div>
+  </div>
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
     <div class="card">{export_annual}</div>
     <div class="card">{export_lines}</div>
@@ -682,7 +721,10 @@ def main():
     detail_cards_html = ""
     for hs6, chart in detail_charts.items():
         info = HS_FLAT.get(hs6, {})
-        detail_cards_html += f'<div class="card"><h3>{hs6} {info.get("tw_name","")}</h3>{chart}</div>\n'
+        detail_cards_html += (
+            f'<div class="card"><h3>{hs6} {info.get("tw_name","")}</h3>'
+            f'<div class="detail-chart-scroll">{chart}</div></div>\n'
+        )
 
     updated = datetime.now().strftime("%Y-%m-%d %H:%M")
     date_range = f"{earliest.strftime('%Y-%m')} – {latest.strftime('%Y-%m')}"
@@ -695,6 +737,7 @@ def main():
         import_area=imp_charts.get("import_area", ""),
         import_lines=imp_charts.get("import_lines", ""),
         export_dest_bar=exp_dest_charts.get("export_dest_bar", no_data_card),
+        export_dest_bar_12m=exp_dest_charts.get("export_dest_bar_12m", no_data_card),
         export_annual=exp_dest_charts.get("export_annual", ""),
         export_lines=exp_dest_charts.get("export_lines", ""),
         export_monthly=exp_dest_charts.get("export_monthly", ""),
