@@ -51,6 +51,23 @@ DSET_COLORS = [
 ]
 DSET_BG   = "#D9EBF7"
 DSET_NAVY = "#093A8C"
+COUNTRY_RED = "#C0392B"
+COUNTRY_BLUE = "#1F5AA6"
+COUNTRY_OTHER_GRAY = "#9CA3AF"
+COUNTRY_PALETTE = [
+    "#E8892A",
+    "#2E7D5E",
+    "#5B5EA6",
+    "#D65740",
+    "#4A9B8E",
+    "#F2C94C",
+    "#314F78",
+    "#859BD5",
+    "#B56576",
+    "#7A9E7E",
+    "#A36F5C",
+    "#3A7CA5",
+]
 
 
 def load_data() -> pd.DataFrame:
@@ -82,6 +99,23 @@ def chart_html(fig, fixed_height: int = None) -> str:
     )
 
 
+def country_color_map(countries: "list[str]") -> "dict[str, str]":
+    """Assign stable colors for destination-country charts."""
+    color_map = {}
+    palette_idx = 0
+    for country in countries:
+        if country == "中國大陸":
+            color_map[country] = COUNTRY_RED
+        elif country == "美國":
+            color_map[country] = COUNTRY_BLUE
+        elif country == "其他 Others":
+            color_map[country] = COUNTRY_OTHER_GRAY
+        else:
+            color_map[country] = COUNTRY_PALETTE[palette_idx % len(COUNTRY_PALETTE)]
+            palette_idx += 1
+    return color_map
+
+
 # ══════════════════════════════════════════════════════════════════════════════
 # Chart builders
 # ══════════════════════════════════════════════════════════════════════════════
@@ -96,10 +130,11 @@ def build_import_charts(df: pd.DataFrame) -> "dict[str, str]":
         df_i.groupby(["date", "category"])["value_kusd"]
         .sum().reset_index().sort_values("date")
     )
+    monthly_cat["value_usd"] = monthly_cat["value_kusd"] * 1_000
     fig = px.area(
-        monthly_cat, x="date", y="value_kusd", color="category",
+        monthly_cat, x="date", y="value_usd", color="category",
         color_discrete_sequence=DSET_COLORS,
-        labels={"value_kusd": "金額 (千美元)", "date": "年月", "category": "類別"},
+        labels={"value_usd": "金額 (USD)", "date": "年月", "category": "類別"},
         title="月進口值 — 依類別",
         height=CHART_HEIGHT,
     )
@@ -114,10 +149,11 @@ def build_import_charts(df: pd.DataFrame) -> "dict[str, str]":
         .sum().reset_index().sort_values("date")
     )
     monthly_hs["label"] = monthly_hs["hs6"] + " " + monthly_hs["en_name"]
+    monthly_hs["value_usd"] = monthly_hs["value_kusd"] * 1_000
     fig2 = px.line(
-        monthly_hs, x="date", y="value_kusd", color="label",
+        monthly_hs, x="date", y="value_usd", color="label",
         color_discrete_sequence=DSET_COLORS,
-        labels={"value_kusd": "金額 (千美元)", "date": "年月", "label": "HS Code"},
+        labels={"value_usd": "金額 (USD)", "date": "年月", "label": "HS Code"},
         title="月進口值 — 依 HS Code（前8大）",
         height=CHART_HEIGHT,
     )
@@ -137,10 +173,11 @@ def build_export_charts(df: pd.DataFrame) -> "dict[str, str]":
         df_e.groupby(["date", "category"])["value_kusd"]
         .sum().reset_index().sort_values("date")
     )
+    monthly_cat["value_usd"] = monthly_cat["value_kusd"] * 1_000
     fig = px.area(
-        monthly_cat, x="date", y="value_kusd", color="category",
+        monthly_cat, x="date", y="value_usd", color="category",
         color_discrete_sequence=DSET_COLORS,
-        labels={"value_kusd": "金額 (千美元)", "date": "年月", "category": "類別"},
+        labels={"value_usd": "金額 (USD)", "date": "年月", "category": "類別"},
         title="月出口值 — 依類別",
         height=CHART_HEIGHT,
     )
@@ -170,11 +207,12 @@ def build_china_charts(df: pd.DataFrame) -> "dict[str, str]":
         china_share.dropna(subset=["china_pct"]),
         x="china_pct", y="en_name", color="category", orientation="h",
         color_discrete_sequence=DSET_COLORS,
-        text=china_share.dropna(subset=["china_pct"])["china_pct"].map("{:.1f}%".format),
         labels={"china_pct": "中國佔比 (%)", "en_name": "商品", "category": "類別"},
         title="對中國進口依賴度（累計期間）",
     )
-    fig.update_traces(textposition="outside", textfont_size=12)
+    fig.update_traces(
+        hovertemplate="商品=%{y}<br>中國佔比=%{x:.1f}%<extra></extra>",
+    )
     fig.update_layout(
         xaxis_range=[0, 118],
         yaxis=dict(tickfont=dict(size=13)),
@@ -230,11 +268,12 @@ def build_detail_charts(df: pd.DataFrame) -> "dict[str, str]":
             df_hs2["country"].isin(top5), other="其他 Others"
         )
         monthly = df_hs2.groupby(["date", "partner"])["value_kusd"].sum().reset_index()
+        monthly["value_usd"] = monthly["value_kusd"] * 1_000
 
         fig = px.bar(
-            monthly, x="date", y="value_kusd", color="partner",
+            monthly, x="date", y="value_usd", color="partner",
             color_discrete_sequence=DSET_COLORS,
-            labels={"value_kusd": "千美元", "date": "年月", "partner": "貿易夥伴"},
+            labels={"value_usd": "USD", "date": "年月", "partner": "貿易夥伴"},
             barmode="stack",
             height=320,
         )
@@ -271,18 +310,26 @@ def build_export_destination_charts(df: pd.DataFrame) -> "dict[str, str]":
         .head(15)
         .reset_index()
     )
+    by_country["value_usd_bn"] = by_country["value_kusd"] * 1_000 / 1_000_000_000
+    bar_countries = by_country["country"].tolist()
+    bar_color_map = country_color_map(bar_countries)
     fig_bar = px.bar(
         by_country,
-        x="value_kusd", y="country",
+        x="value_usd_bn", y="country",
         orientation="h",
-        color_discrete_sequence=[DSET_NAVY],
-        labels={"value_kusd": "出口值 (千USD)", "country": "目的地"},
+        color="country",
+        color_discrete_map=bar_color_map,
+        labels={"value_usd_bn": "出口值 (billion USD)", "country": "目的地"},
         title=f"台灣電池出口目的地（前15，累計：{start_label} – {end_label}）",
         height=460,
-        text=by_country["value_kusd"].map(lambda v: f"{int(v):,}"),
     )
-    fig_bar.update_layout(yaxis={"categoryorder": "total ascending"})
-    fig_bar.update_traces(textposition="outside")
+    fig_bar.update_layout(
+        yaxis={"categoryorder": "total ascending"},
+        showlegend=False,
+    )
+    fig_bar.update_traces(
+        hovertemplate="目的地=%{y}<br>出口值=%{x:.2f} billion USD<extra></extra>",
+    )
     charts["export_dest_bar"] = chart_html(fig_bar)
 
     # ── Top destinations bar chart (last 12 months) ───────────────────────────
@@ -293,32 +340,43 @@ def build_export_destination_charts(df: pd.DataFrame) -> "dict[str, str]":
         .head(15)
         .reset_index()
     )
+    by_country_12m["value_usd_bn"] = by_country_12m["value_kusd"] * 1_000 / 1_000_000_000
+    bar_12m_countries = by_country_12m["country"].tolist()
+    bar_12m_color_map = country_color_map(bar_12m_countries)
     fig_bar_12m = px.bar(
         by_country_12m,
-        x="value_kusd", y="country",
+        x="value_usd_bn", y="country",
         orientation="h",
-        color_discrete_sequence=[DSET_COLORS[3]],
-        labels={"value_kusd": "出口值 (千USD)", "country": "目的地"},
+        color="country",
+        color_discrete_map=bar_12m_color_map,
+        labels={"value_usd_bn": "出口值 (billion USD)", "country": "目的地"},
         title=f"台灣電池出口目的地（前15，近12個月：{cutoff_12m.strftime('%Y-%m')} – {end_label}）",
         height=460,
-        text=by_country_12m["value_kusd"].map(lambda v: f"{int(v):,}"),
     )
-    fig_bar_12m.update_layout(yaxis={"categoryorder": "total ascending"})
-    fig_bar_12m.update_traces(textposition="outside")
+    fig_bar_12m.update_layout(
+        yaxis={"categoryorder": "total ascending"},
+        showlegend=False,
+    )
+    fig_bar_12m.update_traces(
+        hovertemplate="目的地=%{y}<br>出口值=%{x:.2f} billion USD<extra></extra>",
+    )
     charts["export_dest_bar_12m"] = chart_html(fig_bar_12m)
 
     # ── Monthly stacked bar by top 6 countries ────────────────────────────────
     top6 = by_country["country"].head(6).tolist()
     df_e["partner"] = df_e["country"].where(df_e["country"].isin(top6), other="其他 Others")
+    partner_order = top6 + (["其他 Others"] if "其他 Others" in df_e["partner"].values else [])
+    partner_color_map = country_color_map(partner_order)
     monthly = (
         df_e.groupby(["date", "partner"])["value_kusd"]
         .sum().reset_index().sort_values("date")
     )
+    monthly["value_usd"] = monthly["value_kusd"] * 1_000
     fig_monthly = px.bar(
         monthly,
-        x="date", y="value_kusd", color="partner",
-        color_discrete_sequence=DSET_COLORS,
-        labels={"value_kusd": "出口值 (千USD)", "date": "年月", "partner": "目的地"},
+        x="date", y="value_usd", color="partner",
+        color_discrete_map=partner_color_map,
+        labels={"value_usd": "出口值 (USD)", "date": "年月", "partner": "目的地"},
         title="台灣電池月出口值 — 依目的地",
         barmode="stack",
         height=CHART_HEIGHT,
@@ -332,11 +390,12 @@ def build_export_destination_charts(df: pd.DataFrame) -> "dict[str, str]":
         df_e.groupby(["year_label", "partner"])["value_kusd"]
         .sum().reset_index()
     )
+    annual["value_usd"] = annual["value_kusd"] * 1_000
     fig_annual = px.bar(
         annual,
-        x="year_label", y="value_kusd", color="partner",
-        color_discrete_sequence=DSET_COLORS,
-        labels={"value_kusd": "出口值 (千USD)", "year_label": "年份", "partner": "目的地"},
+        x="year_label", y="value_usd", color="partner",
+        color_discrete_map=partner_color_map,
+        labels={"value_usd": "出口值 (USD)", "year_label": "年份", "partner": "目的地"},
         title="台灣電池年出口值 — 依目的地",
         barmode="stack",
         height=CHART_HEIGHT,
@@ -350,11 +409,12 @@ def build_export_destination_charts(df: pd.DataFrame) -> "dict[str, str]":
         .groupby(["date", "partner"])["value_kusd"]
         .sum().reset_index().sort_values("date")
     )
+    monthly_line["value_usd"] = monthly_line["value_kusd"] * 1_000
     fig_line = px.line(
         monthly_line,
-        x="date", y="value_kusd", color="partner",
-        color_discrete_sequence=DSET_COLORS,
-        labels={"value_kusd": "出口值 (千USD)", "date": "年月", "partner": "目的地"},
+        x="date", y="value_usd", color="partner",
+        color_discrete_map=partner_color_map,
+        labels={"value_usd": "出口值 (USD)", "date": "年月", "partner": "目的地"},
         title="主要出口目的地月趨勢（前6）",
         height=CHART_HEIGHT,
     )
@@ -396,8 +456,8 @@ def build_kpi_table(df: pd.DataFrame) -> str:
             "類別": info["category"].split("(")[0].strip(),
             "HS Code": hs6,
             "品名": info["tw_name"],
-            "近12月進口值 (千USD)": f"{int(t12):,}",
-            "近12個月出口值 (千USD)": f"{int(e12):,}",
+            "近12月進口值 (USD)": f"{int(t12 * 1_000):,}",
+            "近12個月出口值 (USD)": f"{int(e12 * 1_000):,}",
             "近12月對中依賴": f"{p12:.1f}%",
         })
     if not rows:
@@ -547,7 +607,6 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 <h1>🔋 台灣電池供應鏈進出口</h1>
 <p class="subtitle">
   資料來源：<a href="https://portal.sw.nat.gov.tw/APGA/GA30" target="_blank">財政部關務署統計資料查詢平台</a>
-  &nbsp;|&nbsp; 單位：千美元 (USD thousands)
   &nbsp;|&nbsp; 資料期間：{date_range}
   &nbsp;|&nbsp; Dashboard 更新：{updated}
 </p>
