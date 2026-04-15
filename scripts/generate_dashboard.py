@@ -816,6 +816,12 @@ HTML_TEMPLATE = """<!DOCTYPE html>
     padding: 1.1rem 1.3rem;
     box-shadow: 0 1px 3px rgba(0,0,0,.06);
   }}
+  .kpi-card.group-a {{
+    background: #F5FAFF;
+  }}
+  .kpi-card.group-b {{
+    background: #FFF8F1;
+  }}
   .kpi-label {{ font-size: .78rem; color: var(--accent2); font-weight: 600; margin-bottom: .3rem; }}
   .kpi-value {{ font-size: 1.5rem; font-weight: 700; color: var(--accent); }}
   .kpi-sub {{ font-size: .8rem; color: var(--muted); margin-top: .15rem; }}
@@ -893,35 +899,35 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 
 <!-- KPI cards -->
 <div class="kpi-grid">
-  <div class="kpi-card">
-    <div class="kpi-label">QoQ 出口電池成長最大</div>
-    <div class="kpi-value">{kpi_qoq_country}</div>
-    <div class="kpi-sub">季增率 {kpi_qoq_pct}　（鋰電池出口，最新季 vs 前季）</div>
-  </div>
-  <div class="kpi-card">
-    <div class="kpi-label">近12月出口值最高國別</div>
-    <div class="kpi-value">{kpi_top_export_country}</div>
-    <div class="kpi-sub">USD {kpi_top_export_value}　（鋰電池成品）</div>
-  </div>
-  <div class="kpi-card">
+  <div class="kpi-card group-a">
     <div class="kpi-label">近12月進口原料總值</div>
     <div class="kpi-value">USD {kpi_material_import_b}B</div>
     <div class="kpi-sub">電池相關原物料（含 850790，不含 850760）</div>
   </div>
-  <div class="kpi-card">
+  <div class="kpi-card group-a">
     <div class="kpi-label">近12月原料進口中國佔比</div>
     <div class="kpi-value">{kpi_china_material_pct}%</div>
     <div class="kpi-sub">中國大陸佔原料進口值</div>
   </div>
-  <div class="kpi-card">
+  <div class="kpi-card group-a">
     <div class="kpi-label">近12個月進口鋰離子蓄電池總值</div>
     <div class="kpi-value">USD {kpi_li_ion_import_b}B</div>
     <div class="kpi-sub">HS 850760</div>
   </div>
-  <div class="kpi-card">
+  <div class="kpi-card group-b">
     <div class="kpi-label">近12個月出口鋰離子蓄電池總值</div>
     <div class="kpi-value">USD {kpi_li_ion_export_b}B</div>
     <div class="kpi-sub">HS 850760</div>
+  </div>
+  <div class="kpi-card group-b">
+    <div class="kpi-label">近12月出口值最高國別</div>
+    <div class="kpi-value">{kpi_top_export_country}</div>
+    <div class="kpi-sub">USD {kpi_top_export_value}　（鋰電池成品）</div>
+  </div>
+  <div class="kpi-card group-b">
+    <div class="kpi-label">QoQ 出口電池成長最大</div>
+    <div class="kpi-value">{kpi_qoq_country}</div>
+    <div class="kpi-sub">季增率 {kpi_qoq_pct}　（鋰電池出口，最新季 vs 前季）</div>
   </div>
 </div>
 
