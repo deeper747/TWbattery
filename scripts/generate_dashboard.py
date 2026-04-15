@@ -633,13 +633,23 @@ HTML_TEMPLATE = """<!DOCTYPE html>
   </div>
   <div class="kpi-card">
     <div class="kpi-label">近12月進口原料總值</div>
-    <div class="kpi-value">USD {kpi_material_import_m}M</div>
-    <div class="kpi-sub">電池相關原物料（不含成品）</div>
+    <div class="kpi-value">USD {kpi_material_import_b}B</div>
+    <div class="kpi-sub">電池相關原物料（含 850790，不含 850760）</div>
   </div>
   <div class="kpi-card">
     <div class="kpi-label">近12月原料進口中國佔比</div>
     <div class="kpi-value">{kpi_china_material_pct}%</div>
     <div class="kpi-sub">中國大陸佔原料進口值</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-label">近12個月進口鋰離子蓄電池總值</div>
+    <div class="kpi-value">USD {kpi_li_ion_import_b}B</div>
+    <div class="kpi-sub">HS 850760</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-label">近12個月出口鋰離子蓄電池總值</div>
+    <div class="kpi-value">USD {kpi_li_ion_export_b}B</div>
+    <div class="kpi-sub">HS 850760</div>
   </div>
 </div>
 
@@ -711,7 +721,7 @@ function showTab(name) {{
 
 
 def calc_kpis(df: pd.DataFrame) -> dict:
-    """Calculate the four headline KPI values."""
+    """Calculate the headline KPI values."""
     latest = df["date"].max()
 
     # ── KPI 1: QoQ battery export growth — country with highest % growth ──────
@@ -745,27 +755,45 @@ def calc_kpis(df: pd.DataFrame) -> dict:
         kpi_top_export_country = top_c
         kpi_top_export_value = f"{int(by_c[top_c]):,}K"
 
-    # ── KPI 3: Raw material imports last 12m (exclude finished batteries) ──────
-    RAW_HS = [h for h in df["hs6"].unique() if h not in BATTERY_HS]
+    # ── KPI 3: Raw material imports last 12m (exclude lithium-ion batteries) ──
+    RAW_HS = [h for h in df["hs6"].unique() if h != "850760"]
     df_raw_12m = df[
         (df["direction"] == "I") &
         (df["hs6"].isin(RAW_HS)) &
         (df["date"] >= cutoff_12m)
     ]
     raw_total = df_raw_12m["value_kusd"].sum()
-    kpi_material_import_m = f"{raw_total/1_000:.1f}" if raw_total else "—"
+    kpi_material_import_b = f"{raw_total/1_000_000:.2f}" if raw_total else "—"
 
     # ── KPI 4: China share of raw material imports last 12m ───────────────────
     raw_china = df_raw_12m[df_raw_12m["is_china"]]["value_kusd"].sum()
     kpi_china_material_pct = f"{raw_china/raw_total*100:.1f}" if raw_total else "—"
+
+    # ── KPI 5-6: Lithium-ion batteries last 12m (HS 850760) ──────────────────
+    df_li_ion_import_12m = df[
+        (df["direction"] == "I") &
+        (df["hs6"] == "850760") &
+        (df["date"] >= cutoff_12m)
+    ]
+    df_li_ion_export_12m = df[
+        (df["direction"] == "E") &
+        (df["hs6"] == "850760") &
+        (df["date"] >= cutoff_12m)
+    ]
+    li_ion_import_total = df_li_ion_import_12m["value_kusd"].sum()
+    li_ion_export_total = df_li_ion_export_12m["value_kusd"].sum()
+    kpi_li_ion_import_b = f"{li_ion_import_total/1_000_000:.2f}" if li_ion_import_total else "—"
+    kpi_li_ion_export_b = f"{li_ion_export_total/1_000_000:.2f}" if li_ion_export_total else "—"
 
     return dict(
         kpi_qoq_country=kpi_qoq_country,
         kpi_qoq_pct=kpi_qoq_pct,
         kpi_top_export_country=kpi_top_export_country,
         kpi_top_export_value=kpi_top_export_value,
-        kpi_material_import_m=kpi_material_import_m,
+        kpi_material_import_b=kpi_material_import_b,
         kpi_china_material_pct=kpi_china_material_pct,
+        kpi_li_ion_import_b=kpi_li_ion_import_b,
+        kpi_li_ion_export_b=kpi_li_ion_export_b,
     )
 
 
