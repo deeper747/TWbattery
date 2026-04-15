@@ -54,20 +54,231 @@ DSET_NAVY = "#093A8C"
 COUNTRY_RED = "#C0392B"
 COUNTRY_BLUE = "#1F5AA6"
 COUNTRY_OTHER_GRAY = "#9CA3AF"
-COUNTRY_PALETTE = [
-    "#E8892A",
-    "#2E7D5E",
-    "#5B5EA6",
-    "#D65740",
-    "#4A9B8E",
-    "#F2C94C",
-    "#314F78",
-    "#859BD5",
-    "#B56576",
-    "#7A9E7E",
-    "#A36F5C",
-    "#3A7CA5",
-]
+COUNTRY_COLOR_MAP = {
+    "中國大陸": COUNTRY_RED,
+    "中華民國": "#E8892A",
+    "丹麥": "#2E7D5E",
+    "亞塞拜然": "#5B5EA6",
+    "以色列": "#D65740",
+    "伊拉克": "#4A9B8E",
+    "伊朗": "#F2C94C",
+    "俄羅斯": "#314F78",
+    "保加利亞": "#859BD5",
+    "克羅埃西亞": "#B56576",
+    "其他國家": COUNTRY_OTHER_GRAY,
+    "冰島": "#7A9E7E",
+    "列支敦斯登": "#A36F5C",
+    "剛果": "#3A7CA5",
+    "剛果民主共和國": "#E8892A",
+    "加彭": "#2E7D5E",
+    "加拿大": "#F05E1C",
+    "匈牙利": "#D65740",
+    "北馬其頓": "#4A9B8E",
+    "北馬里亞納群島": "#F2C94C",
+    "千里達及托巴哥": "#314F78",
+    "南非": "#859BD5",
+    "南韓": "#28156C",
+    "卡達": "#7A9E7E",
+    "印尼": "#A36F5C",
+    "印度": "#3A7CA5",
+    "厄瓜多": "#E8892A",
+    "古巴": "#2E7D5E",
+    "古拉索": "#5B5EA6",
+    "史瓦帝尼": "#D65740",
+    "吉布地": "#4A9B8E",
+    "吉爾吉斯": "#F2C94C",
+    "吉里巴斯": "#314F78",
+    "吐瓦魯": "#859BD5",
+    "哈薩克": "#B56576",
+    "哥倫比亞": "#7A9E7E",
+    "哥斯大黎加": "#A36F5C",
+    "喀麥隆": "#3A7CA5",
+    "喬治亞": "#E8892A",
+    "土庫曼": "#2E7D5E",
+    "土耳其": "#5B5EA6",
+    "坦尚尼亞": "#D65740",
+    "埃及": "#4A9B8E",
+    "塞內加爾": "#F2C94C",
+    "塞席爾": "#314F78",
+    "塞爾維亞": "#859BD5",
+    "墨西哥": "#B56576",
+    "多哥": "#7A9E7E",
+    "多明尼加": "#A36F5C",
+    "大溪地": "#3A7CA5",
+    "奈及利亞": "#E8892A",
+    "奧地利": "#2E7D5E",
+    "委內瑞拉": "#5B5EA6",
+    "孟加拉": "#D65740",
+    "安哥拉": "#4A9B8E",
+    "安圭拉": "#F2C94C",
+    "宏都拉斯": "#314F78",
+    "密克羅尼西亞": "#859BD5",
+    "尚比亞": "#B56576",
+    "尼加拉瓜": "#7A9E7E",
+    "尼泊爾": "#A36F5C",
+    "巴哈馬": "#3A7CA5",
+    "巴基斯坦": "#E8892A",
+    "巴布亞紐幾內亞": "#2E7D5E",
+    "巴拉圭": "#5B5EA6",
+    "巴拿馬": "#D65740",
+    "巴林": "#4A9B8E",
+    "巴西": "#F2C94C",
+    "巴貝多": "#314F78",
+    "希臘": "#859BD5",
+    "帛琉": "#B56576",
+    "幾內亞": "#7A9E7E",
+    "德國": "#08192D",
+    "愛沙尼亞": "#3A7CA5",
+    "愛爾蘭": "#E8892A",
+    "拉脫維亞": "#2E7D5E",
+    "挪威": "#5B5EA6",
+    "捷克": "#D65740",
+    "摩洛哥": "#4A9B8E",
+    "摩爾多瓦": "#F2C94C",
+    "摩納哥": "#314F78",
+    "敘利亞": "#859BD5",
+    "斐濟": "#B56576",
+    "斯洛伐克": "#7A9E7E",
+    "斯洛維尼亞": "#A36F5C",
+    "斯里蘭卡": "#3A7CA5",
+    "新加坡": "#E8892A",
+    "日本": "#F596AA",
+    "智利": "#5B5EA6",
+    "東加": "#D65740",
+    "柬埔寨": "#4A9B8E",
+    "模里西斯": "#F2C94C",
+    "比利時": "#314F78",
+    "汶萊": "#859BD5",
+    "沙烏地阿拉伯": "#B56576",
+    "法國": "#7A9E7E",
+    "法屬圭亞那": "#A36F5C",
+    "法屬玻里尼西亞": "#3A7CA5",
+    "波士尼亞及赫塞哥維納": "#E8892A",
+    "波多黎各": "#2E7D5E",
+    "波蘭": "#9E7A7A",
+    "泰國": "#0B346E",
+    "海地": "#4A9B8E",
+    "澳大利亞": "#F2C94C",
+    "澳門": "#314F78",
+    "烏克蘭": "#859BD5",
+    "烏干達": "#B56576",
+    "烏拉圭": "#7A9E7E",
+    "烏茲別克": "#A36F5C",
+    "牙買加": "#3A7CA5",
+    "獅子山": "#E8892A",
+    "玻利維亞": "#2E7D5E",
+    "瑞典": "#5B5EA6",
+    "瑞士": "#D65740",
+    "瓜地馬拉": "#4A9B8E",
+    "甘比亞": "#F2C94C",
+    "留尼旺": "#314F78",
+    "白俄羅斯": "#859BD5",
+    "百慕達": "#B56576",
+    "盧安達": "#7A9E7E",
+    "盧森堡": "#A36F5C",
+    "科威特": "#3A7CA5",
+    "科索沃": "#E8892A",
+    "秘魯": "#2E7D5E",
+    "突尼西亞": "#5B5EA6",
+    "立陶宛": "#D65740",
+    "約旦": "#4A9B8E",
+    "納米比亞": "#F2C94C",
+    "紐喀里多尼亞": "#314F78",
+    "紐西蘭": "#859BD5",
+    "索馬利亞": "#B56576",
+    "緬甸": "#7A9E7E",
+    "羅馬尼亞": "#A36F5C",
+    "美國": COUNTRY_BLUE,
+    "美屬薩摩亞": "#3A7CA5",
+    "義大利": "#4A9B8E",
+    "聖文森及格瑞納丁": "#2E7D5E",
+    "聖露西亞": "#5B5EA6",
+    "肯亞": "#D65740",
+    "芬蘭": "#4A9B8E",
+    "英國": "#E1A679",
+    "英屬維京群島": "#314F78",
+    "茅利塔尼亞": "#859BD5",
+    "荷蘭": "#E8892A",
+    "莫三比克": "#7A9E7E",
+    "菲律賓": "#A36F5C",
+    "萬那杜": "#3A7CA5",
+    "葉門": "#E8892A",
+    "葡萄牙": "#2E7D5E",
+    "蒙古": "#5B5EA6",
+    "蒙特內哥羅": "#D65740",
+    "蓋亞那": "#4A9B8E",
+    "薩摩亞": "#F2C94C",
+    "薩爾瓦多": "#314F78",
+    "蘇丹": "#859BD5",
+    "蘇利南": "#B56576",
+    "衣索比亞": "#7A9E7E",
+    "西班牙": "#F2C94C",
+    "諾魯": "#3A7CA5",
+    "象牙海岸": "#E8892A",
+    "貝南": "#2E7D5E",
+    "貝里斯": "#5B5EA6",
+    "資訊保護國別": "#D65740",
+    "賴比瑞亞": "#4A9B8E",
+    "賴索托": "#F2C94C",
+    "賽普勒斯": "#314F78",
+    "越南": "#F2C94C",
+    "迦納": "#B56576",
+    "關島": "#7A9E7E",
+    "阿拉伯聯合大公國": "#A36F5C",
+    "阿曼": "#3A7CA5",
+    "阿根廷": "#E8892A",
+    "阿爾及利亞": "#2E7D5E",
+    "阿爾巴尼亞": "#5B5EA6",
+    "阿魯巴": "#D65740",
+    "香港": COUNTRY_RED,
+    "馬來西亞": "#4A9B8E",
+    "馬爾他": "#F2C94C",
+    "馬爾地夫": "#314F78",
+    "馬紹爾群島": "#859BD5",
+    "馬達加斯加": "#838A2D",
+    "黎巴嫩": "#7A9E7E",
+}
+
+COUNTRY_FLAG_MAP = {
+    "中國大陸": "🇨🇳",
+    "香港": "🇭🇰",
+    "美國": "🇺🇸",
+    "日本": "🇯🇵",
+    "南韓": "🇰🇷",
+    "新加坡": "🇸🇬",
+    "德國": "🇩🇪",
+    "荷蘭": "🇳🇱",
+    "英國": "🇬🇧",
+    "法國": "🇫🇷",
+    "加拿大": "🇨🇦",
+    "墨西哥": "🇲🇽",
+    "越南": "🇻🇳",
+    "泰國": "🇹🇭",
+    "馬來西亞": "🇲🇾",
+    "印度": "🇮🇳",
+    "澳大利亞": "🇦🇺",
+    "印尼": "🇮🇩",
+    "菲律賓": "🇵🇭",
+    "義大利": "🇮🇹",
+    "西班牙": "🇪🇸",
+    "比利時": "🇧🇪",
+    "奧地利": "🇦🇹",
+    "瑞士": "🇨🇭",
+    "瑞典": "🇸🇪",
+    "挪威": "🇳🇴",
+    "芬蘭": "🇫🇮",
+    "丹麥": "🇩🇰",
+    "愛爾蘭": "🇮🇪",
+    "葡萄牙": "🇵🇹",
+    "波蘭": "🇵🇱",
+    "捷克": "🇨🇿",
+    "匈牙利": "🇭🇺",
+    "羅馬尼亞": "🇷🇴",
+    "土耳其": "🇹🇷",
+    "沙烏地阿拉伯": "🇸🇦",
+    "阿拉伯聯合大公國": "🇦🇪",
+    "巴西": "🇧🇷",
+}
 
 
 def load_data() -> pd.DataFrame:
@@ -106,19 +317,23 @@ def chart_html(fig, fixed_height: int = None, fixed_width: int = None) -> str:
 
 def country_color_map(countries: "list[str]") -> "dict[str, str]":
     """Assign stable colors for destination-country charts."""
-    color_map = {}
-    palette_idx = 0
-    for country in countries:
-        if country == "中國大陸":
-            color_map[country] = COUNTRY_RED
-        elif country == "美國":
-            color_map[country] = COUNTRY_BLUE
-        elif country == "其他":
-            color_map[country] = COUNTRY_OTHER_GRAY
-        else:
-            color_map[country] = COUNTRY_PALETTE[palette_idx % len(COUNTRY_PALETTE)]
-            palette_idx += 1
-    return color_map
+    return {
+        country: COUNTRY_COLOR_MAP.get(country, "#6B7280")
+        for country in countries
+    }
+
+
+def display_country_name(country: str) -> str:
+    flag = COUNTRY_FLAG_MAP.get(country, "")
+    if country == "其他":
+        return country
+    return f"{flag} {country}".strip()
+
+
+def format_hs_code(hs6: str) -> str:
+    if isinstance(hs6, str) and len(hs6) == 6:
+        return f"{hs6[:4]}.{hs6[4:]}"
+    return hs6
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -143,8 +358,13 @@ def build_import_charts(df: pd.DataFrame) -> "dict[str, str]":
         title="月進口值 — 依類別",
         height=CHART_HEIGHT,
     )
-    fig.update_layout(hovermode="x unified", legend=dict(orientation="h", y=-0.25, font_size=11))
-    charts["import_area"] = chart_html(fig)
+    fig.update_layout(
+        hovermode="x unified",
+        legend=dict(orientation="h", y=-0.25, font_size=11),
+        xaxis_title=None,
+    )
+    fig.update_xaxes(dtick="M1", tickformat="%Y-%m")
+    charts["import_area"] = chart_html(fig, fixed_width=1600)
 
     # 2. Monthly trend by HS code (line chart, top 8 by total)
     top8 = df_i.groupby("hs6")["value_kusd"].sum().nlargest(8).index.tolist()
@@ -162,8 +382,13 @@ def build_import_charts(df: pd.DataFrame) -> "dict[str, str]":
         title="月進口值 — 依 HS Code（前8大）",
         height=CHART_HEIGHT,
     )
-    fig2.update_layout(hovermode="x unified", legend=dict(orientation="h", y=-0.35, font_size=10))
-    charts["import_lines"] = chart_html(fig2)
+    fig2.update_layout(
+        hovermode="x unified",
+        legend=dict(orientation="h", y=-0.35, font_size=10),
+        xaxis_title=None,
+    )
+    fig2.update_xaxes(dtick="M1", tickformat="%Y-%m")
+    charts["import_lines"] = chart_html(fig2, fixed_width=1600)
 
     return charts
 
@@ -280,19 +505,31 @@ def build_detail_charts(df: pd.DataFrame) -> "dict[str, str]":
             .sum().reset_index()
         )
         annual["value_usd"] = annual["value_kusd"] * 1_000
+        annual["value_usd_m"] = annual["value_usd"] / 1_000_000
 
         fig = px.bar(
             annual, x="year_label", y="value_usd", color="partner",
             color_discrete_map=partner_color_map,
+            custom_data=["value_usd_m"],
             labels={"value_usd": "USD", "year_label": "年份", "partner": "貿易夥伴"},
             barmode="stack",
             height=320,
         )
         fig.update_layout(
-            legend=dict(orientation="h", y=-0.3, font_size=10),
-            margin=dict(t=10, b=10),
+            xaxis_title=None,
+            legend=dict(
+                orientation="h",
+                y=-0.3,
+                font_size=10,
+                itemwidth=30,
+                tracegroupgap=0,
+            ),
+            margin=dict(l=64, r=10, t=10, b=10),
         )
-        charts[hs6] = chart_html(fig, fixed_width=640)
+        fig.update_traces(
+            hovertemplate="%{x}<br>%{fullData.name}<br>$%{customdata[0]:,.1f}M<extra></extra>"
+        )
+        charts[hs6] = chart_html(fig, fixed_width=450)
 
     return charts
 
@@ -322,15 +559,19 @@ def build_export_destination_charts(df: pd.DataFrame) -> "dict[str, str]":
         .reset_index()
     )
     by_country["value_usd_bn"] = by_country["value_kusd"] * 1_000 / 1_000_000_000
+    by_country["country_display"] = by_country["country"].map(display_country_name)
     bar_countries = by_country["country"].tolist()
-    bar_color_map = country_color_map(bar_countries)
+    bar_color_map = {
+        display_country_name(country): color
+        for country, color in country_color_map(bar_countries).items()
+    }
     fig_bar = px.bar(
         by_country,
-        x="value_usd_bn", y="country",
+        x="value_usd_bn", y="country_display",
         orientation="h",
-        color="country",
+        color="country_display",
         color_discrete_map=bar_color_map,
-        labels={"value_usd_bn": "出口值 (billion USD)", "country": "目的地"},
+        labels={"value_usd_bn": "出口值 (billion USD)", "country_display": "目的地"},
         title=f"台灣電池出口目的地（前15，累計：{start_label} – {end_label}）",
         height=460,
     )
@@ -352,15 +593,19 @@ def build_export_destination_charts(df: pd.DataFrame) -> "dict[str, str]":
         .reset_index()
     )
     by_country_12m["value_usd_bn"] = by_country_12m["value_kusd"] * 1_000 / 1_000_000_000
+    by_country_12m["country_display"] = by_country_12m["country"].map(display_country_name)
     bar_12m_countries = by_country_12m["country"].tolist()
-    bar_12m_color_map = country_color_map(bar_12m_countries)
+    bar_12m_color_map = {
+        display_country_name(country): color
+        for country, color in country_color_map(bar_12m_countries).items()
+    }
     fig_bar_12m = px.bar(
         by_country_12m,
-        x="value_usd_bn", y="country",
+        x="value_usd_bn", y="country_display",
         orientation="h",
-        color="country",
+        color="country_display",
         color_discrete_map=bar_12m_color_map,
-        labels={"value_usd_bn": "出口值 (billion USD)", "country": "目的地"},
+        labels={"value_usd_bn": "出口值 (billion USD)", "country_display": "目的地"},
         title=f"台灣電池出口目的地（前15，近12個月：{cutoff_12m.strftime('%Y-%m')} – {end_label}）",
         height=460,
     )
@@ -377,17 +622,21 @@ def build_export_destination_charts(df: pd.DataFrame) -> "dict[str, str]":
     top6 = by_country["country"].head(6).tolist()
     df_e["partner"] = df_e["country"].where(df_e["country"].isin(top6), other="其他")
     partner_order = top6 + (["其他"] if "其他" in df_e["partner"].values else [])
-    partner_color_map = country_color_map(partner_order)
+    partner_color_map = {
+        display_country_name(country): color
+        for country, color in country_color_map(partner_order).items()
+    }
     monthly = (
         df_e.groupby(["date", "partner"])["value_kusd"]
         .sum().reset_index().sort_values("date")
     )
     monthly["value_usd"] = monthly["value_kusd"] * 1_000
+    monthly["partner_display"] = monthly["partner"].map(display_country_name)
     fig_monthly = px.bar(
         monthly,
-        x="date", y="value_usd", color="partner",
+        x="date", y="value_usd", color="partner_display",
         color_discrete_map=partner_color_map,
-        labels={"value_usd": "出口值 (USD)", "date": "年月", "partner": "目的地"},
+        labels={"value_usd": "出口值 (USD)", "date": "年月", "partner_display": "目的地"},
         title="台灣電池月出口值 — 依目的地",
         barmode="stack",
         height=CHART_HEIGHT,
@@ -402,11 +651,12 @@ def build_export_destination_charts(df: pd.DataFrame) -> "dict[str, str]":
         .sum().reset_index()
     )
     annual["value_usd"] = annual["value_kusd"] * 1_000
+    annual["partner_display"] = annual["partner"].map(display_country_name)
     fig_annual = px.bar(
         annual,
-        x="year_label", y="value_usd", color="partner",
+        x="year_label", y="value_usd", color="partner_display",
         color_discrete_map=partner_color_map,
-        labels={"value_usd": "出口值 (USD)", "year_label": "年份", "partner": "目的地"},
+        labels={"value_usd": "出口值 (USD)", "year_label": "年份", "partner_display": "目的地"},
         title="台灣電池年出口值 — 依目的地",
         barmode="stack",
         height=CHART_HEIGHT,
@@ -421,11 +671,12 @@ def build_export_destination_charts(df: pd.DataFrame) -> "dict[str, str]":
         .sum().reset_index().sort_values("date")
     )
     monthly_line["value_usd"] = monthly_line["value_kusd"] * 1_000
+    monthly_line["partner_display"] = monthly_line["partner"].map(display_country_name)
     fig_line = px.line(
         monthly_line,
-        x="date", y="value_usd", color="partner",
+        x="date", y="value_usd", color="partner_display",
         color_discrete_map=partner_color_map,
-        labels={"value_usd": "出口值 (USD)", "date": "年月", "partner": "目的地"},
+        labels={"value_usd": "出口值 (USD)", "date": "年月", "partner_display": "目的地"},
         title="主要出口目的地月趨勢（前6）",
         height=CHART_HEIGHT,
     )
@@ -465,11 +716,11 @@ def build_kpi_table(df: pd.DataFrame) -> str:
         e12 = df_e_12m[df_e_12m["hs6"] == hs6]["value_kusd"].sum()
         rows.append({
             "類別": info["category"].split("(")[0].strip(),
-            "HS Code": hs6,
+            "HS Code": format_hs_code(hs6),
             "品名": info["tw_name"],
-            "近12月進口值 (USD)": f"{int(t12 * 1_000):,}",
-            "近12個月出口值 (USD)": f"{int(e12 * 1_000):,}",
+            "近12月進口值 (million USD)": f"{t12 / 1_000:,.1f}",
             "近12月對中依賴": f"{p12:.1f}%",
+            "近12個月出口值 (million USD)": f"{e12 / 1_000:,.1f}",
         })
     if not rows:
         return "<p>No data</p>"
@@ -486,7 +737,7 @@ def build_kpi_table(df: pd.DataFrame) -> str:
         return "background-color:#bbf7d0"
 
     PCT_COLS = {"近12月對中依賴"}
-    NUMERIC_COLS = {"近12月進口值 (USD)", "近12個月出口值 (USD)"}
+    NUMERIC_COLS = {"近12月進口值 (million USD)", "近12個月出口值 (million USD)"}
     cols = list(rows[0].keys())
     html = ['<table class="kpi-table"><thead><tr>']
     for c in cols:
@@ -827,7 +1078,7 @@ def main():
     for hs6, chart in detail_charts.items():
         info = HS_FLAT.get(hs6, {})
         detail_cards_html += (
-            f'<div class="card"><h3>{hs6} {info.get("tw_name","")}</h3>'
+            f'<div class="card"><h3>{format_hs_code(hs6)} {info.get("tw_name","")}</h3>'
             f'<div class="detail-chart-frame">{chart}</div></div>\n'
         )
 
