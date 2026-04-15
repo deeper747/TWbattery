@@ -1,0 +1,53 @@
+name: Monthly Data Update & Dashboard Rebuild
+
+on:
+  # Run on the 10th of every month at 02:00 UTC (= 10:00 Taipei time)
+  schedule:
+    - cron: "0 2 10 * *"
+  # Allow manual trigger from the GitHub Actions UI
+  workflow_dispatch:
+
+permissions:
+  contents: write    # needed to commit docs/index.html back to the repo
+  pages: write
+  id-token: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+          # playwright install chromium  # uncomment if fetch_data.py is used in CI
+
+      # ── Option A: Data is committed to the repo (data/raw/*.csv) ─────────────
+      # If you commit new CSV files to data/raw/ manually and push,
+      # this workflow will reprocess and regenerate the dashboard.
+      - name: Process raw data
+        run: python scripts/process_data.py
+
+      - name: Generate static dashboard
+        run: python scripts/generate_dashboard.py
+
+      # ── Commit updated docs/index.html back to main ───────────────────────────
+      - name: Commit & push dashboard
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add docs/index.html data/processed/
+          git diff --staged --quiet || git commit -m "chore: auto-update dashboard $(date '+%Y-%m')"
+          git push
+
+      # ── Optional: send reminder email if data is stale ────────────────────────
+      # Uncomment and configure if you want email alerts when no new data found:
+      # - name: Check data freshness
+      #   run: python scripts/check_freshness.py
