@@ -1016,12 +1016,12 @@ def calc_kpis(df: pd.DataFrame) -> dict:
         ].groupby("country")["value_kusd"].sum()
 
         combined = pd.concat([q0.rename("prev"), q1.rename("curr")], axis=1).fillna(0)
-        combined = combined[combined["prev"] > 0]   # need non-zero base
         if not combined.empty:
-            combined["qoq"] = (combined["curr"] - combined["prev"]) / combined["prev"] * 100
+            combined["qoq"] = combined["curr"] - combined["prev"]
             best = combined["qoq"].idxmax()
             kpi_qoq_country = best
-            kpi_qoq_pct = f"{combined.loc[best, 'qoq']:+.1f}%"
+            delta_kusd = combined.loc[best, "qoq"]
+            kpi_qoq_pct = f"+{delta_kusd/1_000:,.1f}M USD" if delta_kusd >= 0 else f"{delta_kusd/1_000:,.1f}M USD"
 
     # ── KPI 2: Top export country (battery, last 12m) ─────────────────────────
     cutoff_12m = latest - pd.DateOffset(months=11)
