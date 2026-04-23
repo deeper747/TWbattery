@@ -122,8 +122,58 @@ bash scripts/setup_reminder.sh
 
 ---
 
+## 烏克蘭 HS 8507 進口分析
+
+### 研究問題
+
+台灣是否曾向烏克蘭出口電動載具電池（HS 8507）？在俄烏戰爭前後規模如何變化？台灣在烏克蘭進口來源國中排第幾？
+
+### 資料來源
+
+烏克蘭海關統計局（Державна митна служба України）發布的年度進出口明細，檔案為 Excel 格式，依來源國 × HS 六位碼分列進口金額（千美元）與淨重（公噸）。
+
+資料儲存路徑：`data/raw/country_goods/`，檔名格式：`12 month_YYYY_country_goods.xlsx`
+
+> **注意**：烏克蘭海關將台灣登記為「Тайвань, провінція Китаю」（Taiwan, Province of China）。
+
+### 分析腳本
+
+| 腳本 | 功能 |
+|------|------|
+| `scripts/fetch_ukraine_taiwan_8507.py` | 篩選烏克蘭從台灣進口 HS 8507 的歷年資料，輸出明細與年度摘要 CSV |
+| `scripts/fetch_ukraine_hs8507_all_countries.py` | 擴大範圍至所有來源國，計算台灣排名，產出堆疊長條圖與折線圖 |
+
+### 執行方式
+
+```bash
+# Step 1：僅看台灣 → 烏克蘭的數字
+python scripts/fetch_ukraine_taiwan_8507.py
+# → data/ukraine_taiwan_8507.csv
+# → data/ukraine_taiwan_8507_summary.csv
+
+# Step 2：全來源國比較 + 台灣排名 + 圖表
+python scripts/fetch_ukraine_hs8507_all_countries.py
+# → data/processed/ukraine_hs8507_all_countries.csv
+# → data/processed/ukraine_hs8507_by_country_year.csv
+# → data/processed/ukraine_hs8507_ranking_value.csv
+# → data/processed/ukraine_hs8507_ranking_weight.csv
+# → data/processed/ukraine_hs8507_stacked_value.png
+# → data/processed/ukraine_hs8507_stacked_weight.png
+# → data/processed/ukraine_hs8507_line_value.png
+# → data/processed/ukraine_hs8507_line_weight.png
+```
+
+### 主要產出
+
+- **排名表**：每年前三大供應國 + 台灣排名與金額，分進口值與淨重兩版
+- **堆疊長條圖**：各年度前 10 大來源國佔比（部分年份標 `*` 表示非完整年）
+- **折線圖**：前 10 大來源國歷年趨勢（對數刻度）
+
+---
+
 ## 資料來源
 
-- **進出口資料**：財政部關務署 統計資料查詢平台 (portal.sw.nat.gov.tw/APGA/GA30)
+- **台灣進出口資料**：財政部關務署 統計資料查詢平台 (portal.sw.nat.gov.tw/APGA/GA30)
   - 每月 2 日後公布上月資料；月底前數字可能有微幅修正
+- **烏克蘭進口資料**：烏克蘭海關統計局年度 Excel 報告
 - **HS Code 分類**：參考 U.S. Energy Trade Dashboard 及 Council on Strategic Risks 研究方法
