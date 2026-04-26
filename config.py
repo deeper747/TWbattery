@@ -20,29 +20,23 @@ HS_CODES = {
         },
     },
     "正極材料 (Cathode Materials)": {
-        "283329": {
-            "tw_name": "其他硫酸鹽（鈷／鎳／錳）",
-            "en_name": "Other Sulphates (Co/Ni/Mn)",
-            "tw_10digit": "2833.29.xx",
-            "note": "Key NMC/NCA precursor inputs",
+        "283324": {
+            "tw_name": "硫酸鎳",
+            "en_name": "Nickel Sulphate",
+            "tw_10digit": "2833.24.00.00",
+            "note": "Key NMC/NCA precursor; NiSO4",
         },
-        "282200": {
-            "tw_name": "氧化鈷及氫氧化鈷",
-            "en_name": "Cobalt Oxides & Hydroxides",
-            "tw_10digit": "2822.00.xx",
-            "note": "",
+        "283329": {
+            "tw_name": "其他硫酸鹽（鈷／錳）",
+            "en_name": "Other Sulphates (Co/Mn)",
+            "tw_10digit": "2833.29.xx",
+            "note": "Covers CoSO4 and MnSO4; Ni now tracked separately under 2833.24",
         },
         "282520": {
             "tw_name": "氧化鋰及氫氧化鋰",
             "en_name": "Lithium Oxides & Hydroxides",
             "tw_10digit": "2825.20.xx",
             "note": "Critical lithium compound",
-        },
-        "282540": {
-            "tw_name": "氧化鎳及氫氧化鎳",
-            "en_name": "Nickel Oxides & Hydroxides",
-            "tw_10digit": "2825.40.xx",
-            "note": "",
         },
         "283691": {
             "tw_name": "碳酸鋰",
